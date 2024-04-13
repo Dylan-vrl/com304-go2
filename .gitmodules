@@ -1,0 +1,6 @@
+[submodule "com304/pybind11"]
+	path = com304/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "unitree_sdk2"]
+	path = unitree_sdk2
+	url = https://github.com/unitreerobotics/unitree_sdk2.git
