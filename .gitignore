@@ -3,3 +3,7 @@
 
 # cpp
 build/
+
+# RL HW
+.ipynb_checkpoints/
+data/
