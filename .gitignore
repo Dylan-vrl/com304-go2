@@ -3,3 +3,8 @@
 
 # cpp
 build/
+
+controller.egg-info/
+build.sh
+dist/
+.venv/
