@@ -37,6 +37,7 @@ public:
     unitree::robot::go2::PathPoint path_point_tmp;
     std::vector<unitree::robot::go2::PathPoint> path;
 
+
     time_seg = 0.2;
     time_temp = ct - time_seg;
     for (int i = 0; i < 30; i++)
