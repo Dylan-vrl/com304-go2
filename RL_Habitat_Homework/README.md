@@ -1,3 +1,12 @@
+# Download used data sets
+   ```bash
+   python -m habitat_sim.utils.datasets_download --uids habitat_test_scenes --data-path data/   
+   ```
+   ```bash
+   python -m habitat_sim.utils.datasets_download --uids habitat_test_pointnav_dataset --data-path data/  
+   ```
+
+
 # RL Homework
 
 We are going to use `Habitat` as the simulation engine for our reinforcement learning (RL) homework.
@@ -32,7 +41,7 @@ The `<user>` mentioned in the following sections is your username on the `Izar` 
 2. Pull the `comm-proj-habitat-lab` repository into the `COM-304_ws` folder.
    ```bash
    cd /home/<user>/COM-304_ws
-   git clone git@github.com:JayeFu/comm-proj-habitat-lab.git
+   git clone git@github.com:JayeFu/comm-proj-habitat-labs.git
    ```
 3. Pull the `com-304-robotics-project` repository into the `COM-304_ws` folder.
    ```bash
@@ -103,7 +112,7 @@ for our high-priority queue.
    apptainer shell \
       --nv \
       --writable \
-      --bind /home/<user>/COM-304_ws/comm-proj-habitat-lab:/workspace/habitat-lab/ \
+      --bind /home/<user>/COM-304_ws/comm-proj-habitat-labs:/workspace/habitat-labs/ \
       --bind /home/<user>/COM-304_ws/com-304-robotics-project/RL_Habitat_Homework:/workspace/RL_Habitat_Homework/ \
       /home/<user>/myimages/com304-habitat.sif
    ```
@@ -115,8 +124,8 @@ for our high-priority queue.
    ```
 5. Install `habitat-lab` packages on the fly for latest code change
     ```bash
-    cd /workspace/habitat-lab/
-    pip install -e habitat-lab/
+    cd /workspace/habitat-labs/
+    pip install -e habitat-labs/
     pip install -e habitat-baselines/
     ```
 6. Start the jupyter notebook server.

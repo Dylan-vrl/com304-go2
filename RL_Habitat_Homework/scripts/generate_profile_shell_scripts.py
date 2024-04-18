@@ -66,7 +66,7 @@ if __name__ == "__main__":
     do_slurm = True
 
     # Path can be absolute or relative to the working directory (where you
-    # run the profiling shell script, which is probably the habitat-lab
+    # run the profiling shell script, which is probably the habitat-labs
     # root directory).
     profile_output_folder = "profiles"
 

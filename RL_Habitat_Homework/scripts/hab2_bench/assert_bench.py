@@ -5,7 +5,7 @@
 import os.path as osp
 
 # The numbers obtained in NAME_MAP MINIMUM_PERFORMANCE_1_PROCESS MINIMUM_PERFORMANCE_16_PROCESS are
-# obtained by running the CI at a point in time we were satisfied with the performance of habitat-lab.
+# obtained by running the CI at a point in time we were satisfied with the performance of habitat-labs.
 # The numbers are obtained on the CI machine 'GPU Linux Medium'
 # These numbers are not "maximum performance" and are only used to test for regression.
 # DO NOT QUOTE THESE NUMBERS.

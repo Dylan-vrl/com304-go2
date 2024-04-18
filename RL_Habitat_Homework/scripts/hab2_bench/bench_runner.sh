@@ -4,7 +4,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# NOTE: run this script from habitat-lab/ directory
+# NOTE: run this script from habitat-labs/ directory
 # TO PLOT RESULTS SEE RUN `python scripts/hab2_bench/plot_bench.py`
 mkdir -p data/profile
 NUM_STEPS=200
