@@ -1,0 +1,30 @@
+# object_nav_ppo.yaml
+# This file extends an existing point navigation example with object navigation specifics.
+
+defaults:
+  - habitat_baselines/config/default: true
+
+habitat:
+  seed: 100
+  log_metrics: true
+
+habitat_baselines:
+  trainer_name: "ppo"
+  evaluate: false  # Set to true if you want to run evaluation instead of training
+  force_torch_single_threaded: false
+
+SIMULATOR:
+  AGENT_0:
+    SENSORS: ["RGB_SENSOR", "DEPTH_SENSOR"]
+
+TASK:
+  TYPE: "ObjectNav-v1"
+  MEASUREMENTS: ["DISTANCE_TO_GOAL", "SUCCESS", "SPL"]
+  SENSORS: ["OBJECTGOAL_SENSOR"]
+  OBJECT_CATEGORY: "chair"  # Example object type to find
+
+DATASET:
+  TYPE: "ObjectNav-v1"
+  SPLIT: "train"
+  DATA_PATH: "/path/to/dataset/dataset.json"
+  SCENES_DIR: "/path/to/scenes/"

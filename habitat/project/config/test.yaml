@@ -1,0 +1,19 @@
+# object_search.yaml
+SIMULATOR:
+  TYPE: "Sim-v0"
+  AGENT_0:
+    SENSORS: ['RGB_SENSOR', 'DEPTH_SENSOR']
+TASK:
+  TYPE: "ObjectNav-v1"
+  SENSORS: ['OBJECTGOAL_SENSOR']
+  GOAL_SENSOR_UUID: 'objectgoal'
+  MEASUREMENTS: ['DISTANCE_TO_GOAL', 'SUCCESS', 'SPL']
+  SUCCESS_DISTANCE: 1.0
+  POSSIBLE_GOALS:
+    - 'chair'  # specify your object type here
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 500
+DATASET:
+  TYPE: "PointNav-v1"
+  SPLIT: "train"
+  DATA_PATH: "/path/to/data/dataset_pointnav_habitat.yaml"
