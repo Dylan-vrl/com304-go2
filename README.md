@@ -55,8 +55,7 @@ make
 sudo python3
 >>> import controller
 >>> cont = controller.Controller("<network_interface_name>")
->>> cont.sitdown()
->>> cont.standup()
+>>> cont.move(0.5, 0) # Moves 0.5 meters forward
 ```
 
 ## Add your scripts
