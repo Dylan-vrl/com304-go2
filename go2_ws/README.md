@@ -2,8 +2,13 @@
 
 Warning, this doesn't work yet!
 
+Make sure you have rust and ros2 installed
+
+
 === Terminal 1 ===
 ```bash
+sudo apt install python3-pip clang
+pip install -r go2_ws/src/requirements.txt
 source /opt/ros/humble/setup.bash
 cd go2_ws
 rosdep install --from-paths src --ignore-src -r -y
