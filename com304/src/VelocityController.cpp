@@ -23,7 +23,8 @@ namespace py = pybind11;
 
 using namespace unitree::common;
 
-class Controller {
+// Controls the robot using velocity commands
+class VelocityController {
 public: 
   enum Axis {
     X = 0,
@@ -32,7 +33,7 @@ public:
     AXIS_COUNT = 3
   };
 
-  Controller(const char* network_interface) {
+  VelocityController(const char* network_interface) {
     Init(network_interface);
   }
 
@@ -82,7 +83,7 @@ public:
     sport_client->StopMove();
   }
 
-  ~Controller() {
+  ~VelocityController() {
     delete sport_client;
   }
 
@@ -111,13 +112,13 @@ private:
     sport_client->Init();
 
     suber.reset(new unitree::robot::ChannelSubscriber<unitree_go::msg::dds_::SportModeState_>(TOPIC_HIGHSTATE));
-    suber->InitChannel(std::bind(&Controller::HighStateHandler, this, std::placeholders::_1), 1);
+    suber->InitChannel(std::bind(&VelocityController::HighStateHandler, this, std::placeholders::_1), 1);
 
     sport_client->StopMove();
     Read();
 
-    writeThread = CreateRecurrentThreadEx("write", UT_CPU_ID_NONE, DELTA_TIME * 1000000, &Controller::Write, this);
-    readThread = CreateRecurrentThreadEx("read", UT_CPU_ID_NONE, DELTA_TIME * 1000000, &Controller::Read, this);
+    writeThread = CreateRecurrentThreadEx("write", UT_CPU_ID_NONE, DELTA_TIME * 1000000, &VelocityController::Write, this);
+    readThread = CreateRecurrentThreadEx("read", UT_CPU_ID_NONE, DELTA_TIME * 1000000, &VelocityController::Read, this);
   }
 
   void Write() {
@@ -171,19 +172,19 @@ private:
   };
 };
 
-PYBIND11_MODULE(controller, m) {
-  py::class_<Controller> controller(m, "Controller");
+PYBIND11_MODULE(VelocityController, m) {
+  py::class_<VelocityController> VelocityController(m, "VelocityController");
 
-  controller.def(py::init<const char*>())
-    .def("move", &Controller::Move)
-    .def("rotate", &Controller::Rotate)
-    .def("stop", static_cast<void (Controller::*)()>(&Controller::Stop))
-    .def("stop", static_cast<void (Controller::*)(Controller::Axis)>(&Controller::Stop));
+  VelocityController.def(py::init<const char*>())
+    .def("move", &VelocityController::Move)
+    .def("rotate", &VelocityController::Rotate)
+    .def("stop", static_cast<void (VelocityController::*)()>(&VelocityController::Stop))
+    .def("stop", static_cast<void (VelocityController::*)(VelocityController::Axis)>(&VelocityController::Stop));
 
-  py::enum_<Controller::Axis>(controller, "Axis")
-    .value("X", Controller::Axis::X)
-    .value("Y", Controller::Axis::Y)
-    .value("YAW", Controller::Axis::YAW);
+  py::enum_<VelocityController::Axis>(VelocityController, "Axis")
+    .value("X", VelocityController::Axis::X)
+    .value("Y", VelocityController::Axis::Y)
+    .value("YAW", VelocityController::Axis::YAW);
 }
 
 int main(int argc, char **argv)
@@ -194,7 +195,7 @@ int main(int argc, char **argv)
     exit(-1);
   }
   //argv[1] is network interface of the robot
-  Controller c(argv[1]);
+  VelocityController c(argv[1]);
   sleep(1);
   c.Rotate(M_PI);
   while(1) {

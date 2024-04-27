@@ -8,7 +8,7 @@ link_libraries(unitree_sdk2 ddsc ddscxx rt pthread)
 
 # Python linked scripts
 add_subdirectory(ext/pybind11)
-pybind11_add_module(controller src/controller.cpp)
+pybind11_add_module(VelocityController src/VelocityController.cpp)
 
 # Pure cpp scripts
 add_executable(test src/test.cpp)
