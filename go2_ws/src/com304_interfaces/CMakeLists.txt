@@ -11,8 +11,8 @@ find_package(rosidl_default_generators REQUIRED)
 
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/COM304Move.msg"
-  "msg/COM304Rotate.msg"
+  "msg/Move.msg"
+  "msg/Rotate.msg"
 )
 
 ament_package()

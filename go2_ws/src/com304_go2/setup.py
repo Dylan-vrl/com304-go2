@@ -24,7 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'go2_control_node = com304_go2.go2_control_node:main'
+            'go2_control_node = com304_go2.go2_control_node:main',
+            'goal_pose_node = com304_go2.goal_pose_node:main'
         ],
     },
 )
