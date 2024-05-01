@@ -9,11 +9,20 @@ from com304_interfaces.msg import Move, Rotate
 
 from math import cos, sin
 
-GOAL_EPSILON = 0.06 # Distance to be considered as reaching the goal
+GOAL_EPSILON = { 
+    'x': 0.08,
+    'y': 0.08,
+    'yaw': 0.08
+} # Distance to be considered as reaching the goal
 MAX_VEL = {
     'x': 0.4,
     'y': 0.4,
     'yaw': 0.6
+}
+MIN_VEL = {
+    'x': 0.2,
+    'y': 0.2,
+    'yaw': 0.2
 }
 
 class RobotControlNode(Node):
@@ -22,6 +31,7 @@ class RobotControlNode(Node):
 
         self.pose = None
         self.goal = None
+        self.last_goal = None
 
         self.delta_queue = [] # Expressed as deltas, e.g. next_pos = current_pos + delta
         self.move_msg = Twist()
@@ -29,7 +39,7 @@ class RobotControlNode(Node):
         self.command_publisher = self.create_publisher(String, '/command', 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         
-        self.move_msg_timer = self.create_timer(0.1, self.move_msg_callback)
+        self.move_msg_timer = self.create_timer(0.05, self.move_msg_callback)
         self.cmd_vel_timer = self.create_timer(0.5, self.cmd_vel_callback)
 
         self.move_subscriber = self.create_subscription(Move, '/move', self.move, 10)
@@ -47,8 +57,10 @@ class RobotControlNode(Node):
             return
         
         delta_local = self.delta_queue.pop(0)
-        delta_world = self.local_to_world(delta_local) # In robot local space (x forward, y left)
-        pose = self.pose
+        pose = self.pose if self.last_goal is None else self.last_goal 
+
+        delta_world = self.local_to_world(pose['yaw'], delta_local) # In robot local space (x forward, y left)
+
 
         goal = {}
         goal['x'] = delta_world['x'] + pose['x']
@@ -63,6 +75,7 @@ class RobotControlNode(Node):
         goal['yaw'] = goal_yaw
 
         self.goal = goal
+        self.last_goal = goal
 
         self.get_logger().info(f'Start moving from {pose} to {goal}')
 
@@ -71,8 +84,6 @@ class RobotControlNode(Node):
         delta_y = msg.y
 
         self.delta_queue.append({'x': delta_x, 'y': delta_y, 'yaw': 0.0})
-        self.get_logger().info(f'Added move delta: {self.delta_queue[-1]}')
-
         if len(self.delta_queue) == 1:
             self.set_next_goal()
             return
@@ -88,10 +99,11 @@ class RobotControlNode(Node):
     # Stop moving and clear the delta queue
     def stop_clear(self, msh: Empty=None):
         self.delta_queue = []
-        self.stop()
+        self.last_goal = None
+        self.stop(force_stop=True)
 
-    def stop(self, msg: Empty=None):
-        if self.is_stopped():
+    def stop(self, msg: Empty=None, force_stop: bool=False):
+        if not force_stop and self.is_stopped():
             return
         self.goal = None
         self.command_publisher.publish(String(data='StopMove'))
@@ -105,10 +117,10 @@ class RobotControlNode(Node):
         if self.is_moving():
             for axis in v.keys():           
                 dist = self.dist_to_goal(axis)
-                if dist < GOAL_EPSILON:
+                if dist < GOAL_EPSILON[axis]:
                     v[axis] = 0.0
                 else:
-                    v[axis] = MAX_VEL[axis] / (1.0 if dist > 1 else max(1 / dist, 0.1))
+                    v[axis] = MAX_VEL[axis] / (1.0 if dist > 1 else max(1 / dist, MIN_VEL[axis]))
 
                 v[axis] *= self.dir_to_goal(axis)
 
@@ -118,6 +130,8 @@ class RobotControlNode(Node):
                     move_this_frame = True
 
         if not move_this_frame:
+            if self.is_moving():
+                self.get_logger().info(f'Goal reached: goal: {self.goal}, position: {self.pose}')
             self.stop()
             self.set_next_goal()
             return
@@ -156,21 +170,19 @@ class RobotControlNode(Node):
     def is_moving(self):
         return not self.is_stopped()
     
-    def local_to_world(self, local: dict) -> dict:
+    def local_to_world(self, orientation: float, local: dict) -> dict:
         if not self.pose:
             return local
         
-        orientation = self.pose['yaw']
         x = local['x'] * cos(orientation) - local['y'] * sin(orientation)
         y = local['x'] * sin(orientation) + local['y'] * cos(orientation)
         yaw = local.get('yaw', orientation)
         return {'x': x, 'y': y, 'yaw': yaw}
     
-    def world_to_local(self, world: dict) -> dict:
+    def world_to_local(self, orientation: float, world: dict) -> dict:
         if not self.pose:
             return world
         
-        orientation = self.pose['yaw']
         x = world['x'] * cos(orientation) + world['y'] * sin(orientation)
         y = world['x'] * (-sin(orientation)) + world['y'] * cos(orientation)
         yaw = world.get('yaw', orientation)
@@ -180,20 +192,24 @@ class RobotControlNode(Node):
         if not self.pose or not self.goal:
             return 0.0
 
-        local_pose = self.world_to_local(self.pose)
-        local_goal = self.world_to_local(self.goal)
+        local_pose = self.world_to_local(self.pose['yaw'], self.pose)
+        local_goal = self.world_to_local(self.pose['yaw'], self.goal)
         return abs(local_goal[axis] - local_pose[axis])
 
     def dir_to_goal(self, axis: str) -> int:
+        def sign(x):
+            return 1 if x > 0 else -1
+        
         if not self.pose or not self.goal:
             return 0
 
         pose_to_goal = {axis: self.goal[axis] - self.pose[axis] for axis in ['x', 'y', 'yaw']}
-        local_pose_to_goal = self.world_to_local(pose_to_goal)
+        local_pose_to_goal = self.world_to_local(self.pose['yaw'], pose_to_goal)
+
         return 1 if local_pose_to_goal[axis] > 0 else -1
 
-    def goal_reached(self, axis: str, v: float = 0.0) -> bool:
-        return self.dist_to_goal(axis) - v < GOAL_EPSILON
+    def goal_reached(self, axis: str) -> bool:
+        return self.dist_to_goal(axis) < GOAL_EPSILON[axis]
 
 def main(args=None):
     rclpy.init(args=args)

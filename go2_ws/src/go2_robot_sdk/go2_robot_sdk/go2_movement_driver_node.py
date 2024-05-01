@@ -57,7 +57,7 @@ class RobotBaseNode(Node):
             self.command_callback,
             qos_profile)
         
-        self.robot_state_timer = self.create_timer(0.1, self.robot_state_callback)
+        self.robot_state_timer = self.create_timer(0.05, self.robot_state_callback)
 
     def robot_state_callback(self):
         self.publish_robot_state()
