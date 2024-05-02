@@ -21,16 +21,17 @@ import tqdm
 
 import habitat_sim
 from habitat import VectorEnv
-from habitat.utils.visualizations.utils import overlay_frame
 from habitat.utils.visualizations.utils import observations_to_image
 from habitat_baselines.common.baseline_registry import baseline_registry
-from habitat_baselines.common.habitat_env_factory import HabitatVectorEnvFactory
 from habitat_baselines.config.default import get_config
 from habitat_baselines.utils.common import (
     batch_obs,
     inference_mode,
 )
 from habitat_baselines.rl.ppo import PPO
+
+from habitat.utils.render_wrapper import overlay_frame
+from habitat_baselines.common.construct_vector_env import construct_envs
 
 matplotlib.rcParams["figure.dpi"] = 100
 sns.set_style("whitegrid")
@@ -169,6 +170,7 @@ def dynmaic_test(sim):
             display_obs(rgb_obs, depth_obs)
         else:
             print(f"Invalid input {key_pressed}. Please only use TGFH!")
+
 
 if __name__ == '__main__':
     main()
