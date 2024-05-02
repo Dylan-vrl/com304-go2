@@ -42,6 +42,6 @@ ros2 launch com304_go2 control.launch.py
 Publish to the `/move` and `/rotate` topics to control the robot.
 ```bash
 source install/setup.bash
-ros2 topic pub /move com304_interfaces/msg/COM304Move {x: 0.3, y: 0}
-ros2 topic pub /rotate com304_interfaces/msg/COM304RRotate {yaw: 1.57}
+ros2 topic pub /move com304_interfaces/msg/Move "{x: 0.3, y: 0}"
+ros2 topic pub /rotate com304_interfaces/msg/Rotate "{yaw: 1.57}"
 ```
