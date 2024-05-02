@@ -12,3 +12,4 @@ data/
 # Outputs
 .mp4
 RL_Habitat_Homework/output_video/
+.eggs/
