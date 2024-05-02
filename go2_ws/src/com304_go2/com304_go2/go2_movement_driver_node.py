@@ -66,7 +66,6 @@ class RobotBaseNode(Node):
         x = msg.linear.x
         y = msg.linear.y
         z = msg.angular.z
-        #if x > 0.0 or y > 0.0 or z > 0.0: disable backwards movement
         self.robot_cmd_vel = gen_mov_command(x, y, z)
 
     def command_callback(self, msg):
@@ -161,6 +160,7 @@ async def start_node():
     await asyncio.wait([spin_task, sleep_task], return_when=asyncio.FIRST_COMPLETED)
 
 def main():
+    print("Starting go2_movement_driver_node")
     rclpy.init()
     asyncio.get_event_loop().run_until_complete(start_node())
     asyncio.get_event_loop().close()

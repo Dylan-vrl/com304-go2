@@ -11,7 +11,7 @@ def generate_launch_description():
     
     return LaunchDescription([
         Node(
-            package='go2_robot_sdk',
+            package='com304_go2',
             executable='go2_movement_driver_node',
             parameters=[{'robot_ip': robot_ip, 'token': robot_token}],
             ),

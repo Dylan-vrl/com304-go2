@@ -179,7 +179,7 @@ class RobotControlNode(Node):
         local_pose_to_goal = self.world_to_local(self.pose['yaw'], pose_to_goal)
         goal = local_pose_to_goal[axis]
         if axis == 'yaw':
-            self.normalize_yaw(goal)
+            goal = self.normalize_yaw(goal)
         return 1 if goal > 0 else -1
 
     def goal_reached(self, axis: str) -> bool:
@@ -188,20 +188,20 @@ class RobotControlNode(Node):
 # ========== Utils ==========
 
     # Normalize yaw goal to be between -PI and PI
-    def normalize_yaw(yaw: float) -> float:
+    def normalize_yaw(self, yaw: float) -> float:
         while yaw > math.pi:
             yaw -= 2 * math.pi
         while yaw < -math.pi:
             yaw += 2 * math.pi
         return yaw
     
-    def local_to_world(orientation: float, local: dict) -> dict:
+    def local_to_world(self, orientation: float, local: dict) -> dict:
         x = local['x'] * cos(orientation) - local['y'] * sin(orientation)
         y = local['x'] * sin(orientation) + local['y'] * cos(orientation)
         yaw = local.get('yaw', orientation)
         return {'x': x, 'y': y, 'yaw': yaw}
     
-    def world_to_local(orientation: float, world: dict) -> dict:
+    def world_to_local(self, orientation: float, world: dict) -> dict:
         x = world['x'] * cos(orientation) + world['y'] * sin(orientation)
         y = world['x'] * (-sin(orientation)) + world['y'] * cos(orientation)
         yaw = world.get('yaw', orientation)

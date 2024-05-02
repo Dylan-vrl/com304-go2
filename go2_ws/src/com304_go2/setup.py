@@ -25,7 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'go2_control_node = com304_go2.go2_control_node:main',
-            'goal_pose_node = com304_go2.goal_pose_node:main'
+            'go2_movement_driver_node = com304_go2.go2_movement_driver_node:main',
         ],
     },
 )
