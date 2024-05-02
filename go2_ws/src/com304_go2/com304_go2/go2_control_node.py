@@ -65,14 +65,7 @@ class RobotControlNode(Node):
         goal = {}
         goal['x'] = delta_world['x'] + pose['x']
         goal['y'] = delta_world['y'] + pose['y']
-
-        # Normalize yaw goal to be between -PI and PI
-        goal_yaw = pose['yaw'] + delta_world['yaw']
-        while goal_yaw > math.pi:
-            goal_yaw -= 2 * math.pi
-        while goal_yaw < -math.pi:
-            goal_yaw += 2 * math.pi
-        goal['yaw'] = goal_yaw
+        goal['yaw'] = self.normalize_yaw(pose['yaw'] + delta_world['yaw'])
 
         self.goal = goal
         self.last_goal = goal
@@ -162,31 +155,13 @@ class RobotControlNode(Node):
         pose['yaw'] = msg.rpy[2]
         self.pose = pose
 
-# ========== Utils ==========
-
+# ========== State ==========
+    
     def is_stopped(self):
         return self.goal is None
     
     def is_moving(self):
         return not self.is_stopped()
-    
-    def local_to_world(self, orientation: float, local: dict) -> dict:
-        if not self.pose:
-            return local
-        
-        x = local['x'] * cos(orientation) - local['y'] * sin(orientation)
-        y = local['x'] * sin(orientation) + local['y'] * cos(orientation)
-        yaw = local.get('yaw', orientation)
-        return {'x': x, 'y': y, 'yaw': yaw}
-    
-    def world_to_local(self, orientation: float, world: dict) -> dict:
-        if not self.pose:
-            return world
-        
-        x = world['x'] * cos(orientation) + world['y'] * sin(orientation)
-        y = world['x'] * (-sin(orientation)) + world['y'] * cos(orientation)
-        yaw = world.get('yaw', orientation)
-        return {'x': x, 'y': y, 'yaw': yaw}
     
     def dist_to_goal(self, axis: str) -> float:
         if not self.pose or not self.goal:
@@ -197,19 +172,40 @@ class RobotControlNode(Node):
         return abs(local_goal[axis] - local_pose[axis])
 
     def dir_to_goal(self, axis: str) -> int:
-        def sign(x):
-            return 1 if x > 0 else -1
-        
         if not self.pose or not self.goal:
             return 0
 
         pose_to_goal = {axis: self.goal[axis] - self.pose[axis] for axis in ['x', 'y', 'yaw']}
         local_pose_to_goal = self.world_to_local(self.pose['yaw'], pose_to_goal)
-
-        return 1 if local_pose_to_goal[axis] > 0 else -1
+        goal = local_pose_to_goal[axis]
+        if axis == 'yaw':
+            self.normalize_yaw(goal)
+        return 1 if goal > 0 else -1
 
     def goal_reached(self, axis: str) -> bool:
         return self.dist_to_goal(axis) < GOAL_EPSILON[axis]
+    
+# ========== Utils ==========
+
+    # Normalize yaw goal to be between -PI and PI
+    def normalize_yaw(yaw: float) -> float:
+        while yaw > math.pi:
+            yaw -= 2 * math.pi
+        while yaw < -math.pi:
+            yaw += 2 * math.pi
+        return yaw
+    
+    def local_to_world(orientation: float, local: dict) -> dict:
+        x = local['x'] * cos(orientation) - local['y'] * sin(orientation)
+        y = local['x'] * sin(orientation) + local['y'] * cos(orientation)
+        yaw = local.get('yaw', orientation)
+        return {'x': x, 'y': y, 'yaw': yaw}
+    
+    def world_to_local(orientation: float, world: dict) -> dict:
+        x = world['x'] * cos(orientation) + world['y'] * sin(orientation)
+        y = world['x'] * (-sin(orientation)) + world['y'] * cos(orientation)
+        yaw = world.get('yaw', orientation)
+        return {'x': x, 'y': y, 'yaw': yaw}
 
 def main(args=None):
     rclpy.init(args=args)
