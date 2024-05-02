@@ -25,7 +25,7 @@ MIN_VEL = {
     'yaw': 0.2
 }
 
-class RobotControlNode(Node):
+class Go2ControlNode(Node):
     def __init__(self):
         super().__init__('go2_control_node')
 
@@ -210,7 +210,7 @@ class RobotControlNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    robot_control = RobotControlNode()
+    robot_control = Go2ControlNode()
 
     rclpy.spin(robot_control)
 

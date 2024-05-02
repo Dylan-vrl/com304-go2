@@ -24,8 +24,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'go2_control_driver_node = com304_go2.go2_control_driver_node:main',
             'go2_control_node = com304_go2.go2_control_node:main',
-            'go2_movement_driver_node = com304_go2.go2_movement_driver_node:main',
+            'go2_camera_node = com304_go2.go2_camera_node:main',
         ],
     },
 )

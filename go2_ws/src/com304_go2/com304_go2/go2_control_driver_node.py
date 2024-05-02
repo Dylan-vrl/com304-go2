@@ -12,7 +12,6 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
-from tf2_ros import TransformBroadcaster
 from geometry_msgs.msg import Twist
 from go2_interfaces.msg import Go2State, IMU
 from std_msgs.msg import String
@@ -23,10 +22,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class RobotBaseNode(Node):
+class Go2ControlDriverNode(Node):
 
     def __init__(self):
-        super().__init__('go2_movement_driver_node')
+        super().__init__('go2_control_driver_node')
 
         self.declare_parameter('robot_ip', os.getenv('ROBOT_IP', os.getenv('GO2_IP')))
         self.declare_parameter('token', os.getenv('ROBOT_TOKEN', os.getenv('GO2_TOKEN','')))
@@ -35,8 +34,6 @@ class RobotBaseNode(Node):
         self.token = self.get_parameter('token').get_parameter_value().string_value
         self.conn = None
         qos_profile = QoSProfile(depth=10)
-
-        self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
 
         self.robot_cmd_vel = None
         self.robot_sport_state = None
@@ -147,7 +144,7 @@ async def spin(node: Node):
 
 
 async def start_node():
-    base_node = RobotBaseNode()
+    base_node = Go2ControlDriverNode()
     conn = Go2Connection(
         robot_ip=base_node.robot_ip,
         token=base_node.token,
@@ -160,7 +157,6 @@ async def start_node():
     await asyncio.wait([spin_task, sleep_task], return_when=asyncio.FIRST_COMPLETED)
 
 def main():
-    print("Starting go2_movement_driver_node")
     rclpy.init()
     asyncio.get_event_loop().run_until_complete(start_node())
     asyncio.get_event_loop().close()
