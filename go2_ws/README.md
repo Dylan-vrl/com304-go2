@@ -1,7 +1,5 @@
 # Usage
 
-Warning, this doesn't work yet! Delays make the move for a certain distance algorithm fail to reach its goal.
-
 Make sure you have rust and ros2 installed
 
 === To run only once ===
@@ -20,29 +18,20 @@ rosdep install --from-paths src --ignore-src -r -y
 colcon build
 ```
 
-=== Terminal 1 (driver) ===
+=== Terminal 1 ===
 
-The driver is part of the sdk and publishes the data (LiDAR, camera, position, IMU) and offers topic to control the robot (`/cmd_vel` for example)
 ```bash
 export ROBOT_IP="Your robot ip"
 source install/setup.bash
-ros2 launch com304_go2 driver.launch.py
+ros2 launch com304_go2 robot.launch.py
 ```
 
-=== Terminal 2 (control) ===
+=== Terminal 2 ===
 
 The control is made by ourselves. It publishes to control topics (`/cmd_vel`, ...) and offers custom topics for ease of use (`/move` and `/rotate`)
 ```bash
-source install/setup.bash
-ros2 launch com304_go2 control.launch.py
-```
-
-
-=== Terminal 3 (interactive) ===
-Publish to the `/move` and `/rotate` topics to control the robot.
-```bash
-source install/setup.bash
 ros2 topic pub --once /move com304_interfaces/msg/Move "{x: 0.3, y: 0}"
 ros2 topic pub --once /rotate com304_interfaces/msg/Rotate "{yaw: 1.57}"
 ros2 topic pub --once /stop std_msgs/msg/Empty
+ros2 topic pub --once /save_camera std_msgs/msg/Empty
 ```
