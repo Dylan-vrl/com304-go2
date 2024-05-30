@@ -38,7 +38,8 @@ class Go2ControlNode(Node):
 
         self.command_publisher = self.create_publisher(String, '/command', 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        
+        self.goal_reached_publisher = self.create_publisher(Empty, '/goal_reached', 10)
+
         self.move_msg_timer = self.create_timer(0.05, self.move_msg_callback)
         self.cmd_vel_timer = self.create_timer(0.5, self.cmd_vel_callback)
 
@@ -125,6 +126,7 @@ class Go2ControlNode(Node):
         if not move_this_frame:
             if self.is_moving():
                 self.get_logger().info(f'Goal reached: goal: {self.goal}, position: {self.pose}')
+                self.goal_reached_publisher.publish(Empty())
             self.stop()
             self.set_next_goal()
             return

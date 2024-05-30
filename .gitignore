@@ -8,3 +8,5 @@ controller.egg-info/
 build.sh
 dist/
 .venv/
+
+**__pycache__**

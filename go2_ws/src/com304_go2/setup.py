@@ -13,7 +13,8 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
-
+        (os.path.join('share', package_name, 'models'), glob(os.path.join('models', 'model_only.pth'))),
+        (os.path.join('share', package_name, 'models', 'mono+stereo_640x192'), glob(os.path.join('models', 'mono+stereo_640x192', '*'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -27,6 +28,7 @@ setup(
             'go2_control_driver_node = com304_go2.go2_control_driver_node:main',
             'go2_control_node = com304_go2.go2_control_node:main',
             'go2_camera_node = com304_go2.go2_camera_node:main',
+            'go2_autonomous_node = com304_go2.go2_autonomous_node:main',
         ],
     },
 )
