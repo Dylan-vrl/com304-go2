@@ -4,16 +4,16 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Empty
 from geometry_msgs.msg import Twist
-from go2_interfaces.msg import Go2State, IMU
+from unitree_go.msg import SportModeState
 from com304_interfaces.msg import Move, Rotate
 
 from math import cos, sin
 
-GOAL_EPSILON = { 
+GOAL_EPSILON = {
     'x': 0.08,
     'y': 0.08,
     'yaw': 0.08
-} # Distance to be considered as reaching the goal
+}  # Distance to be considered as reaching the goal
 MAX_VEL = {
     'x': 0.4,
     'y': 0.4,
@@ -25,6 +25,7 @@ MIN_VEL = {
     'yaw': 0.2
 }
 
+
 class Go2ControlNode(Node):
     def __init__(self):
         super().__init__('go2_control_node')
@@ -33,11 +34,11 @@ class Go2ControlNode(Node):
         self.goal = None
         self.last_goal = None
 
-        self.delta_queue = [] # Expressed as deltas, e.g. next_pos = current_pos + delta
+        self.delta_queue = []  # Expressed as deltas, e.g. next_pos = current_pos + delta
         self.move_msg = Twist()
 
         self.command_publisher = self.create_publisher(String, '/command', 10)
-        self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, '/go2/cmd_vel', 10)
         self.goal_reached_publisher = self.create_publisher(Empty, '/goal_reached', 10)
 
         self.move_msg_timer = self.create_timer(0.05, self.move_msg_callback)
@@ -47,8 +48,7 @@ class Go2ControlNode(Node):
         self.rotate_subscriber = self.create_subscription(Rotate, '/rotate', self.rotate, 10)
         self.stop_subscriber = self.create_subscription(Empty, '/stop', self.stop_clear, 10)
 
-        self.go2_state_subscriber = self.create_subscription(Go2State, '/go2_states', self.go2_state_callback, 10)
-        self.imu_subscriber = self.create_subscription(IMU, '/imu', self.imu_callback, 10)
+        self.go2_state_subscriber = self.create_subscription(SportModeState, '/sportmodestate', self.go2_state_callback, 10)
 
 # ========== Actions ==========
 
@@ -56,12 +56,11 @@ class Go2ControlNode(Node):
     def set_next_goal(self):
         if self.is_moving() or not self.delta_queue or self.pose is None:
             return
-        
+
         delta_local = self.delta_queue.pop(0)
-        pose = self.pose if self.last_goal is None else self.last_goal 
+        pose = self.pose if self.last_goal is None else self.last_goal
 
-        delta_world = self.local_to_world(pose['yaw'], delta_local) # In robot local space (x forward, y left)
-
+        delta_world = self.local_to_world(pose['yaw'], delta_local)  # In robot local space (x forward, y left)
 
         goal = {}
         goal['x'] = delta_world['x'] + pose['x']
@@ -81,7 +80,7 @@ class Go2ControlNode(Node):
         if len(self.delta_queue) == 1:
             self.set_next_goal()
             return
-    
+
     def rotate(self, msg: Rotate):
         delta_yaw = msg.yaw
 
@@ -91,25 +90,25 @@ class Go2ControlNode(Node):
             return
 
     # Stop moving and clear the delta queue
-    def stop_clear(self, msh: Empty=None):
+    def stop_clear(self, msh: Empty = None):
         self.delta_queue = []
         self.last_goal = None
         self.stop(force_stop=True)
 
-    def stop(self, msg: Empty=None, force_stop: bool=False):
+    def stop(self, msg: Empty = None, force_stop: bool = False):
         if not force_stop and self.is_stopped():
             return
         self.goal = None
         self.command_publisher.publish(String(data='StopMove'))
-       
+
 # ========== Callbacks ==========
 
     def move_msg_callback(self):
         v = {'x': 0.0, 'y': 0.0, 'yaw': 0.0}
         move_this_frame = False
-        
+
         if self.is_moving():
-            for axis in v.keys():           
+            for axis in v.keys():
                 dist = self.dist_to_goal(axis)
                 if dist < GOAL_EPSILON[axis]:
                     v[axis] = 0.0
@@ -130,7 +129,7 @@ class Go2ControlNode(Node):
             self.stop()
             self.set_next_goal()
             return
-        
+
         msg = Twist()
         msg.linear.x = v['x']
         msg.linear.y = v['y']
@@ -142,29 +141,21 @@ class Go2ControlNode(Node):
             return
         self.cmd_vel_publisher.publish(self.move_msg)
 
-    def go2_state_callback(self, msg: Go2State):
-        pose = {}
-        pose['x'] = msg.position[0]
-        pose['y'] = msg.position[1]
-        pose['yaw'] = 0.0 if self.pose is None else self.pose['yaw']
-        self.pose = pose
-        # self.get_logger().info(f'Updated pose: ({self.move_data["pose"]["x"]}, {self.move_data["pose"]["y"]})')
-
-    def imu_callback(self, msg: IMU):
-        pose = {}
-        pose['x'] = 0.0 if self.pose is None else self.pose['x']
-        pose['y'] = 0.0 if self.pose is None else self.pose['y']
-        pose['yaw'] = msg.rpy[2]
-        self.pose = pose
+    def go2_state_callback(self, msg: SportModeState):
+        self.pose = {
+            'x': msg.position[0],
+            'y': msg.position[1],
+            'yaw': msg.imu_state.rpy[2]
+        }
 
 # ========== State ==========
-    
+
     def is_stopped(self):
         return self.goal is None
-    
+
     def is_moving(self):
         return not self.is_stopped()
-    
+
     def dist_to_goal(self, axis: str) -> float:
         if not self.pose or not self.goal:
             return 0.0
@@ -186,7 +177,7 @@ class Go2ControlNode(Node):
 
     def goal_reached(self, axis: str) -> bool:
         return self.dist_to_goal(axis) < GOAL_EPSILON[axis]
-    
+
 # ========== Utils ==========
 
     # Normalize yaw goal to be between -PI and PI
@@ -196,18 +187,19 @@ class Go2ControlNode(Node):
         while yaw < -math.pi:
             yaw += 2 * math.pi
         return yaw
-    
+
     def local_to_world(self, orientation: float, local: dict) -> dict:
         x = local['x'] * cos(orientation) - local['y'] * sin(orientation)
         y = local['x'] * sin(orientation) + local['y'] * cos(orientation)
         yaw = local.get('yaw', orientation)
         return {'x': x, 'y': y, 'yaw': yaw}
-    
+
     def world_to_local(self, orientation: float, world: dict) -> dict:
         x = world['x'] * cos(orientation) + world['y'] * sin(orientation)
         y = world['x'] * (-sin(orientation)) + world['y'] * cos(orientation)
         yaw = world.get('yaw', orientation)
         return {'x': x, 'y': y, 'yaw': yaw}
+
 
 def main(args=None):
     rclpy.init(args=args)
