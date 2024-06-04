@@ -2,9 +2,10 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from std_msgs.msg import Empty
-
+import cv2
+from cv_bridge import CvBridge
 from datetime import datetime
-from PIL import Image as PILImage
+
 
 class Go2DepthNode(Node):
     def __init__(self):
@@ -13,6 +14,7 @@ class Go2DepthNode(Node):
         self.save_subscriber = self.create_subscription(Empty, '/save_depth', self.save_callback, 10)
         self.depth_subscriber = self.create_subscription(Image, '/d435i/depth/image_rect_raw', self.depth_callback, 10)
         self.last_image = None
+        self.bridge = CvBridge()
 
     def depth_callback(self, msg: Image):
         self.last_image = msg
@@ -21,9 +23,8 @@ class Go2DepthNode(Node):
         file_name = f'depth-{datetime.now().timestamp()}.jpg'
         self.get_logger().info(f'Start saving depth image to {file_name}...')
         if self.last_image is not None:
-            bytes_image = bytes(self.last_image.data)
-            image = PILImage.frombytes('RGB', (self.last_image.width, self.last_image.height), bytes_image)
-            image.save(file_name)
+            cv_image = self.bridge.imgmsg_to_cv2(self.last_image, desired_encoding="passthrough")
+            cv2.imwrite(file_name, cv_image)
             self.get_logger().info(f'Saved depth image to {file_name}.')
         else:
             self.get_logger().info('No image received yet.')
