@@ -1,4 +1,5 @@
 import math
+import PIL.Image as pil
 
 import rclpy
 from rclpy.node import Node
@@ -22,11 +23,13 @@ class Go2AutonomousNode(Node):
         self.move_publisher = self.create_publisher(Move, '/move', 10)
         self.rotate_publisher = self.create_publisher(Rotate, '/rotate', 10)
 
-        self.cam_subscriber = self.create_subscription(Image, '/go2_camera/color/image', self.cam_callback, 10)
+        self.cam_subscriber = self.create_subscription(Image, '/go2/sensor/camera', self.cam_callback, 10)
+        self.depth_subscriber = self.create_subscription(Image, '/d435i/depth/image_rect_raw', self.depth_callback, 10)
         self.goal_subscriber = self.create_subscription(Empty, '/goal_reached', self.goal_reached_callback, 10)
         self.start_subscriber = self.create_subscription(Empty, '/start', self.start_callback, 10)
 
-        self.last_image = None
+        self.last_image_rgb = None
+        self.last_image_depth = None
         model_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'model_only.pth'
         agent_config = PPOAgentConfig()
         agent_config.INPUT_TYPE = "rgbd"
@@ -37,7 +40,7 @@ class Go2AutonomousNode(Node):
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
         self.model = CustomAgent(agent_config, Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'mono+stereo_640x192')
-        self.model.reset()        
+        self.model.reset()
 
     def stop(self):
         msg = Empty()
@@ -64,7 +67,10 @@ class Go2AutonomousNode(Node):
         self.get_logger().info(f"Action taken: Turn right")
 
     def cam_callback(self, msg: Image):
-        self.last_image = msg
+        self.last_image_rgb = msg
+
+    def depth_callback(self, msg: Image):
+        self.last_image_depth = msg
 
     def goal_reached_callback(self, msg: Empty):
         self.get_logger().info("Goal reached callback")
@@ -75,12 +81,19 @@ class Go2AutonomousNode(Node):
         self.execute_next_action()
 
     def execute_next_action(self):
-        data = np.frombuffer(self.last_image.data, dtype='uint8')
-        data_2d = np.reshape(data, (self.last_image.height, self.last_image.step))
-        image_array = data_2d.reshape((self.last_image.height, self.last_image.width, 3))
+        data_rgb = np.frombuffer(self.last_image_rgb.data, dtype='uint8')
+        data_2d_rgb = np.reshape(data_rgb, (self.last_image_rgb.height, self.last_image_rgb.step))
+        image_array_rgb = data_2d_rgb.reshape((self.last_image_rgb.height, self.last_image_rgb.width, 3))
+
+        # data_depth = np.frombuffer(self.last_image_depth.data, dtype='float32') / 255.0
+        data_depth = np.frombuffer(self.last_image_depth.data, dtype='uint8')
+        data_2d_depth = np.reshape(data_depth, (self.last_image_depth.height, self.last_image_depth.step))
+        image_array_depth = data_2d_depth.reshape((self.last_iamge_depth.height, self.last_image_depth.width, 3))
+        image_depth = pil.fromarray(image_array_depth).convert("L")  # "L" = Grayscale
 
         observations = {
-            "rgb": np.array(image_array, dtype='uint8'),
+            "rgb": np.array(image_array_rgb, dtype='uint8'),
+            "depth": np.array(image_depth, dtype='float32')
         }
         self.get_logger().info(f'Before act')
         next_action = self.model.act(observations)['action']
