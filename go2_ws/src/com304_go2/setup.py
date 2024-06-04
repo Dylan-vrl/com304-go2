@@ -28,6 +28,7 @@ setup(
             'go2_control_driver_node = com304_go2.go2_control_driver_node:main',
             'go2_control_node = com304_go2.go2_control_node:main',
             'go2_camera_node = com304_go2.go2_camera_node:main',
+            'go2_depth_node = com304_go2.go2_depth_node:main',
             'go2_autonomous_node = com304_go2.go2_autonomous_node:main',
         ],
     },

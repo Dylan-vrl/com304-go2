@@ -32,11 +32,11 @@ class Go2DepthNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    cam_node = Go2DepthNode()
+    depth_node = Go2DepthNode()
 
-    rclpy.spin(cam_node)
+    rclpy.spin(depth_node)
 
-    cam_node.destroy_node()
+    depth_node.destroy_node()
     rclpy.shutdown()
 
 

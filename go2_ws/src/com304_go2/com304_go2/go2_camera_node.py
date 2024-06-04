@@ -10,7 +10,7 @@ class Go2CameraNode(Node):
     def __init__(self):
         super().__init__('go2_camera_node')
 
-        self.save_subscriber = self.create_subscription(Empty, '/save_camera', self.save_callback, 10)
+        self.save_subscriber = self.create_subscription(Empty, '/save_rgb', self.save_callback, 10)
         self.cam_subscriber = self.create_subscription(Image, '/go2/sensor/camera', self.cam_callback, 10)
         self.last_image = None
 
