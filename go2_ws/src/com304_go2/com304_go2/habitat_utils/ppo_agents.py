@@ -6,6 +6,7 @@
 
 
 from dataclasses import dataclass
+from typing import Tuple
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -13,7 +14,7 @@ from omegaconf import DictConfig, OmegaConf
 class PPOAgentConfig:
     INPUT_TYPE: str = "rgb"
     MODEL_PATH: str = "data/checkpoints/gibson-rgb-best.pth"
-    RESOLUTION: int = 256
+    RESOLUTION: Tuple[int, int] = (256, 256)
     HIDDEN_SIZE: int = 512
     RANDOM_SEED: int = 7
     PTH_GPU_ID: int = 0

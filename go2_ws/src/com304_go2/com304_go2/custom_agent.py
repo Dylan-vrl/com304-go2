@@ -13,7 +13,6 @@ from omegaconf import DictConfig
 
 from .habitat_utils.agent import Agent
 from .habitat_utils.simulator import Observations
-from .habitat_utils.ppo_agents import PPOAgentConfig
 from .habitat_utils.resnet_policy import PointNavResNetPolicy
 from .habitat_utils.common import batch_obs
 
@@ -36,7 +35,7 @@ class CustomAgent(Agent):
             spaces["depth"] = Box(
                 low=0,
                 high=1,
-                shape=(config.RESOLUTION, config.RESOLUTION, 1),
+                shape=(config.RESOLUTION[0], config.RESOLUTION[1], 1),
                 dtype=np.float32,
             )
 
@@ -44,7 +43,7 @@ class CustomAgent(Agent):
             spaces["rgb"] = Box(
                 low=0,
                 high=255,
-                shape=(config.RESOLUTION, config.RESOLUTION, 3),
+                shape=(config.RESOLUTION[0], config.RESOLUTION[1], 3),
                 dtype=np.uint8,
             )
         observation_spaces = SpaceDict(spaces)

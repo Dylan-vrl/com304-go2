@@ -8,7 +8,7 @@ from geometry_msgs.msg import Twist
 from com304_interfaces.msg import Move, Rotate
 
 from pathlib import Path
-from .custom_agent import CustomAgent
+from .habitat_nn import HabitatController
 from .habitat_utils.ppo_agents import PPOAgentConfig
 
 from PIL import Image as PILImage
@@ -20,8 +20,6 @@ from cv_bridge import CvBridge
 class Go2AutonomousNode(Node):
     def __init__(self):
         super().__init__('go2_autonomous_node')
-
-        self.declare_parameter('model_file', os.getenv('MODEL_FILE', 'model.pth'))
 
         self.stop_publisher = self.create_publisher(Empty, '/stop', 10)
         self.move_publisher = self.create_publisher(Move, '/move', 10)
@@ -36,17 +34,12 @@ class Go2AutonomousNode(Node):
         self.last_depth = None
         self.bridge = CvBridge()
 
-        model_file = self.get_parameter('model_file').get_parameter_value().string_value
-        model_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / model_file
-        agent_config = PPOAgentConfig()
-        agent_config.INPUT_TYPE = "rgbd"
-        agent_config.MODEL_PATH = model_path
-        agent_config.GOAL_SENSOR_UUID = "pointgoal"
-        agent_config.RESOLUTION = (256, 144)
+        cfg_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'config' / 'config.yaml'
+        ckpt_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'model.pth'
 
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
-        self.model = CustomAgent(agent_config)
+        self.model = HabitatController(cfg_path, ckpt_path)
         self.model.reset()        
 
     def stop(self):

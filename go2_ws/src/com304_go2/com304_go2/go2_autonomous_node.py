@@ -7,6 +7,8 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from com304_interfaces.msg import Move, Rotate
 import numpy as np
+from PIL import Image as PILImage
+import cv2 as cv
 
 from pathlib import Path
 from .custom_agent import CustomAgent
@@ -27,12 +29,13 @@ class Go2AutonomousNode(Node):
         self.start_subscriber = self.create_subscription(Empty, '/start', self.start_callback, 10)
 
         self.last_image = None
+
         model_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'model_only.pth'
         agent_config = PPOAgentConfig()
         agent_config.INPUT_TYPE = "rgbd"
         agent_config.MODEL_PATH = model_path
         agent_config.GOAL_SENSOR_UUID = "pointgoal"
-        agent_config.RESOLUTION = 128
+        agent_config.RESOLUTION = (256, 144)
 
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
@@ -75,14 +78,20 @@ class Go2AutonomousNode(Node):
         self.execute_next_action()
 
     def execute_next_action(self):
+        self.get_logger().info(str(len(self.last_image.data)))
         data = np.frombuffer(self.last_image.data, dtype='uint8')
         data_2d = np.reshape(data, (self.last_image.height, self.last_image.step))
         image_array = data_2d.reshape((self.last_image.height, self.last_image.width, 3))
 
+        # image = PILImage.fromarray(image_array).convert('RGB')
+        # image.save('test.png')
+        # im_np = cv.resize(image_array, (64, 36))
+        # image = PILImage.fromarray(im_np)
+        # image.save('test2.png')
+
         observations = {
             "rgb": np.array(image_array, dtype='uint8'),
         }
-        self.get_logger().info(f'Before act')
         next_action = self.model.act(observations)['action']
         self.get_logger().info(f'Next action {next_action}')
         self.actions[next_action]()
