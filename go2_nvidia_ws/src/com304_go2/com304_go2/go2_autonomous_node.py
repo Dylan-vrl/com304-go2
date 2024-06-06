@@ -40,7 +40,6 @@ class Go2AutonomousNode(Node):
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
         self.model = HabitatController(cfg_path, ckpt_path)
-        self.model.reset()        
 
     def stop(self):
         msg = Empty()
@@ -49,20 +48,20 @@ class Go2AutonomousNode(Node):
 
     def move_forward(self):
         msg = Move()
-        msg.x = 0.3
+        msg.x = 0.5
         msg.y = 0.0
         self.move_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Move forward")
 
     def turn_left(self):
         msg = Rotate()
-        msg.yaw = math.pi/6
+        msg.yaw = math.pi/4
         self.rotate_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Turn left")
 
     def turn_right(self):
         msg = Rotate()
-        msg.yaw = -math.pi/6
+        msg.yaw = -math.pi/4
         self.rotate_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Turn right")
 
@@ -81,30 +80,41 @@ class Go2AutonomousNode(Node):
         self.execute_next_action()
 
     def execute_next_action(self):
+        obs_space = self.model.obs_space
+
         # Collect rgb observations
         rgb_data = self.bridge.imgmsg_to_cv2(self.last_rgb, desired_encoding="rgb8")
-        im = PILImage.fromarray(rgb_data)
-        im.save('last_rgb.jpg')
+        cv2.imwrite(f'last_high_rgb.jpg', cv2.cvtColor(rgb_data, cv2.COLOR_RGB2BGR))
+
+        rgb_resize_shape = obs_space['rgb'].shape[:2][::-1]
+        rgb_obs = cv2.resize(rgb_data, rgb_resize_shape)
+        cv2.imwrite(f'last_low_rgb.jpg', cv2.cvtColor(rgb_obs, cv2.COLOR_RGB2BGR))
         self.get_logger().info('Saved last frame rgb')
 
         # Collect depth observations
         depth_data = self.bridge.imgmsg_to_cv2(self.last_depth, desired_encoding="passthrough")
-
         depth_img = cv2.normalize(depth_data, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
-        im = PILImage.fromarray(depth_img)
-        im.save('last_depth.jpg')
+        cv2.imwrite(f'last_high_depth.jpg', cv2.cvtColor(cv2.transpose(depth_img), cv2.COLOR_RGB2BGR))
+        self.get_logger().info(str(depth_data.shape))
+
+        depth_resize_shape = obs_space['depth'].shape[:2][::-1]
+        depth_obs = cv2.resize(depth_data, depth_resize_shape)
+        depth_img = cv2.normalize(depth_obs, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
+        cv2.imwrite(f'last_low_depth.jpg', cv2.cvtColor(cv2.transpose(depth_img), cv2.COLOR_RGB2BGR))
         self.get_logger().info('Saved last frame depth')
 
-        depth_data = depth_data.astype('float32')
-        depth_data = cv2.normalize(depth_data, None, 0, 1, cv2.NORM_MINMAX)
-        depth_data = depth_data[:, :, np.newaxis]
+        depth_obs = depth_obs.astype('float32')
+        depth_obs = depth_obs / 10
+        depth_obs = depth_obs[:, :, np.newaxis]
+        self.get_logger().info(f'{depth_obs.shape}')
+        self.get_logger().info(str(obs_space['depth'].shape))
 
         observations = {
-            "rgb": rgb_data,
-            "depth": depth_data
+            "rgb": rgb_obs,
+            "depth": depth_obs
         }
 
-        next_action = self.model.act(observations)['action']
+        next_action = self.model.act(observations)
         self.get_logger().info(f'Next action {next_action}')
         self.actions[next_action]()
 

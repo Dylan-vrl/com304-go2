@@ -87,8 +87,7 @@ class HabitatController(nn.Module):
         ckpt_dict = torch.load(ckpt_path, map_location=self.device)
 
         self._obs_space = get_observation_space(
-            config.habitat.simulator.agents.main_agent,
-            select_keys=config.habitat_baselines.rl.policy.obs_transforms.select_observation.selected_keys
+            config.habitat.simulator.agents.main_agent
         )
 
         action_space = get_action_space(config.habitat.task.actions)
@@ -205,5 +204,3 @@ class HabitatController(nn.Module):
             )
 
         return step_data[0]
-
-hab_controller = HabitatController()
