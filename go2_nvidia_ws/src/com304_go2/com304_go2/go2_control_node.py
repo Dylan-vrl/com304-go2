@@ -104,7 +104,7 @@ class Go2ControlNode(Node):
             return
         self.get_logger().info("Requesting to stop...")
         self.goal = None
-        self.mode_req.request_data = 'stop'
+        self.mode_req.request_data = 'stop_move'
         self.mode_client.call_async(self.mode_req)
     
 # ========== Callbacks ==========
