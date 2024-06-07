@@ -1,67 +1,67 @@
-# COM-304 Unitree Go2 Project
+## Quick start
+1. Establish ethernet connection\
+    Follow the instructions in the [GO2 Network Interface](https://www.docs.quadruped.de/projects/go2/html/go2_driver.html#go2-network-interface) of the robot's documentation.
+2. Build the [`unitree_sdk2`](ext/unitree_sdk2/) project
+    ```bash
+    cd ext/unitree_sdk2
+    sudo ./install.sh
+    mkdir build
+    cd build
+    cmake ..
+    make
+    ```
+3. Run an example script
+    ```bash
+    sudo ./sportmode_test <network_interface_name>
+    ```
 
-## Folder structure
+Explore the different ways you can interact with the robot using examples in [`ext/unitree_sdk2/example`](ext/unitree_sdk2/example/).
 
-### `com304`
 
-All our files should lie in there. The `pybind11` submodule is included. It is used to wrap the `C++` code we create in `Python` to call it from `habitat`.
+## Usage
+You have two possibilities, either you develop a program to be run in C++ only, as in the [quick start](#quick-start) example or you create a program meant to be run in Python.
 
-### `unitree_sdk2`
+### C++ script
+To add your own C++ script, make sure to add this line to [`CMakeLists.txt`](CMakeLists.txt): 
+```
+add_executable(<your_exec_name> <your_source_file>)
+```
 
-It is a submodule containing the official SDK for the Unitree Go2 along with examples.
-
-## How to run
-
-### Direct `C++` control
-
-To run the `C++` scripts directly you need to build the files (either from `com304` or `unitree_sdk2`):
-```console
+Then, as you did for the `unitree_sdk2`, rebuild your project:
+```bash
 mkdir build
 cd build
 cmake ..
 make
 ```
 
-Then, you can run your executable: `sudo ./<exec_name>`. For example `sudo ./test <network interface name>`.
+And run your executable:
+```bash
+sudo ./<your_exec_name> <network_interface_name>
+```
 
-To run an example from the sdk here are all the commands:
-```console
-cd unitree_sdk2
+### Python script
 
-# Do this routine only once, the first time you build the project
-sudo ./install.sh
-mkdir build
+We also needed to send commands to the robot in Python. To do so, we created bindings for our C++ code to be used directly from Python. Learn more about bindings in the official [pybind11 repo](https://github.com/pybind/pybind11).
+
+To make your scripts compatible with `pybind11`, you simply need to include it and define a module that defines how the Python code should be generated. You can find an example in [VelocityController.cpp](src/VelocityController.cpp).
+
+Then, add this line to [`CMakeLists.txt`](CMakeLists.txt), both names **must** match:
+```
+pybind11_add_module(<script_name> src/<script_name>.cpp)
+```
+
+Don't forget to rebuild the project.
+
+You can now test your script. Inside the `build` directory, start a Python Shell session:
+```bash
 cd build
-
-# Do this routine everytime you modify something to a script
-cmake ..
-make
-
-# Run the script of your choice
-sudo ./sportmode_test <network_interface_name>
+python3
 ```
-
-### Indirect `Python` control
-
-As `habitat` is in `Python`, we need a wrapper to call the SDK from `Python`. To do so, we use a library called `pybind11`.
-
-`controller.cpp` contains a minimalist script to demonstrate this wrapper capability. To run it from the command line interpreter do the following:
-
-```console
-cd com304/build
-cmake ..
-make
-
-sudo python3
->>> import controller
->>> cont = controller.Controller("<network_interface_name>")
->>> cont.move(0.5, 0) # Moves 0.5 meters forward
+```python
+from VelocityController import VelocityController
+controller = VelocityController("<network_interface_name>")
+controller.move(0.5, 0)
+controller.rotate(3.1415)
+controller.stop()
 ```
-
-## Add your scripts
-
-### Direct `C++` scripts
-Add this line to the `CMakeLists.txt` of your project: `add_executable(<exec_name> <filename.cpp>)`
-
-### Wrapped `C++` scripts
-Add this line to the `CMakeLists.txt` of your project: `pybind11_add_module(<module_name> <module_name>.cpp)`.

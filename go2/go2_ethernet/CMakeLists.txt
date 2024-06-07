@@ -11,4 +11,4 @@ add_subdirectory(ext/pybind11)
 pybind11_add_module(VelocityController src/VelocityController.cpp)
 
 # Pure cpp scripts
-add_executable(test src/test.cpp)
+add_executable(sit src/Sit.cpp)

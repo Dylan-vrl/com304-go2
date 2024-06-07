@@ -1,7 +1,6 @@
-// Minimalist script that makes the dog sit down.
+// Minimalist script that makes the dog sit down then stand up.
 
 #include <unitree/robot/go2/sport/sport_client.hpp>
-#include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -10,9 +9,8 @@ int main(int argc, char **argv)
     std::cout << "Usage: " << argv[0] << " networkInterface" << std::endl;
     exit(-1);
   }
-  unitree::robot::ChannelFactory::Instance()->Init(0, argv[1]);
-//argv[1] is network interface of the robot
-  
+
+  unitree::robot::ChannelFactory::Instance()->Init(0, argv[1]);  
   unitree::robot::go2::SportClient sport_client;
   sport_client.SetTimeout(10.0f);
   sport_client.Init();
