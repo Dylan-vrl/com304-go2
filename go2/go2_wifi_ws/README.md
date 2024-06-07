@@ -1,6 +1,6 @@
 For more details about the installation process, take a look at the [`go2_ros2_sdk repository`](https://github.com/abizovnuralem/go2_ros2_sdk). 
 
-It is assumed you have both [`rust`](https://www.rust-lang.org/tools/install) and [ros2](https://docs.ros.org/en/humble/Installation.html) installed. 
+It is assumed you have both [`rust`](https://www.rust-lang.org/tools/install) and [`ros2`](https://docs.ros.org/en/humble/Installation.html) installed. 
 
 Our code may become invalid due to changes in the SDK we use. For example, if they change some topics name, you will have to adapt the code accordingly.
 
