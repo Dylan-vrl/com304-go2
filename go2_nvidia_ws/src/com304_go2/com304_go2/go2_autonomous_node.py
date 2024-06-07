@@ -40,6 +40,7 @@ class Go2AutonomousNode(Node):
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
         self.model = HabitatController(cfg_path, ckpt_path)
+        self.action_count = 0
 
     def stop(self):
         msg = Empty()
@@ -84,26 +85,26 @@ class Go2AutonomousNode(Node):
 
         # Collect rgb observations
         rgb_data = self.bridge.imgmsg_to_cv2(self.last_rgb, desired_encoding="rgb8")
-        cv2.imwrite(f'last_high_rgb.jpg', cv2.cvtColor(rgb_data, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(f'last_high_rgb_{self.action_count}.jpg', cv2.cvtColor(rgb_data, cv2.COLOR_RGB2BGR))
 
         rgb_resize_shape = obs_space['rgb'].shape[:2][::-1]
         rgb_obs = cv2.resize(rgb_data, rgb_resize_shape)
-        cv2.imwrite(f'last_low_rgb.jpg', cv2.cvtColor(rgb_obs, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(f'last_low_rgb_{self.action_count}.jpg', cv2.cvtColor(rgb_obs, cv2.COLOR_RGB2BGR))
         self.get_logger().info('Saved last frame rgb')
 
         # Collect depth observations
         depth_data = self.bridge.imgmsg_to_cv2(self.last_depth, desired_encoding="passthrough")
         depth_img = cv2.normalize(depth_data, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
-        cv2.imwrite(f'last_high_depth.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(f'last_high_depth_{self.action_count}.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
 
         depth_resize_shape = obs_space['depth'].shape[:2][::-1]
         depth_obs = cv2.resize(depth_data, depth_resize_shape)
         depth_img = cv2.normalize(depth_obs, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
-        cv2.imwrite(f'last_low_depth.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(f'last_low_depth_{self.action_count}.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
         self.get_logger().info('Saved last frame depth')
 
         depth_obs = depth_obs.astype('float32')
-        depth_obs = depth_obs / 10
+        depth_obs = cv2.normalize(depth_obs, None, 0, 1, cv2.NORM_MINMAX)
         depth_obs = depth_obs[:, :, np.newaxis]
 
         observations = {
@@ -113,6 +114,7 @@ class Go2AutonomousNode(Node):
 
         next_action = self.model.act(observations)
         self.get_logger().info(f'Next action {next_action}')
+        self.action_count += 1
         self.actions[next_action]()
 
 def main(args=None):
