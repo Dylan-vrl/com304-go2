@@ -1,6 +1,6 @@
 [submodule "pybind11"]
-	path = com304/ext/pybind11
+	path = go2/go2_ethernet/ext/pybind11
 	url = https://github.com/pybind/pybind11.git
 [submodule "unitree_sdk2"]
-	path = com304/ext/unitree_sdk2
+	path = go2/go2_ethernet/ext/unitree_sdk2
 	url = https://github.com/unitreerobotics/unitree_sdk2.git
