@@ -12,3 +12,9 @@ data/
 # Outputs
 .mp4
 RL_Habitat_Homework/output_video/
+controller.egg-info/
+build.sh
+dist/
+.venv/
+
+**__pycache__**

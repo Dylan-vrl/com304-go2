@@ -1,0 +1,10 @@
+aiortc
+aiohttp
+paho-mqtt
+python-dotenv
+wasmtime
+pytorch=0.4.1 
+torchvision=0.2.1
+tensorboardX==1.4
+opencv=3.3.1
+pillow<7
