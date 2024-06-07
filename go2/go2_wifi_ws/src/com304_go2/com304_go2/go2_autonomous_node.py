@@ -1,22 +1,18 @@
 import math
+from pathlib import Path
+
+import numpy as np
+import cv2
+from cv_bridge import CvBridge
 
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Empty
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Twist
 from com304_interfaces.msg import Move, Rotate
-import numpy as np
-from PIL import Image as PILImage
-import cv2
-from cv_bridge import CvBridge
 
-from pathlib import Path
-from .habitat_nn import HabitatController
-from .habitat_utils.ppo_agents import PPOAgentConfig
-from .monodepth2 import RGBtoDepthModel
-
-from math import cos, sin
+from .autonomous_agent.controller import Controller
+from .rgb2depth.converter import RGBToDepthConverter
 
 class Go2AutonomousNode(Node):
     def __init__(self):
@@ -40,8 +36,8 @@ class Go2AutonomousNode(Node):
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
         self.action_count = 0
 
-        self.model = HabitatController(cfg_path, ckpt_path)
-        self.rgb2depth = RGBtoDepthModel(Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'mono+stereo_640x192')
+        self.model = Controller(cfg_path, ckpt_path)
+        self.rgb2depth = RGBToDepthConverter(Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'mono+stereo_640x192')
 
     def stop(self):
         msg = Empty()

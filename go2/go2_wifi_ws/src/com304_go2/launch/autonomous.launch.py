@@ -14,16 +14,16 @@ def generate_launch_description():
             parameters=[{'robot_ip': robot_ip, 'token': robot_token}],
             ),
         Node(
-            package='ros2_go2_video',
-            executable='ros2_go2_video',
-            parameters=[{'robot_ip': robot_ip, 'robot_token': robot_token}],
-            ),
-        Node(
             package='com304_go2',
             executable='go2_control_node',
             ),
         Node(
             package='com304_go2',
             executable='go2_autonomous_node',
+            ),
+        Node(
+            package='ros2_go2_video',
+            executable='ros2_go2_video',
+            parameters=[{'robot_ip': robot_ip, 'robot_token': robot_token}],
             ),
     ])
