@@ -81,6 +81,14 @@ class Go2AutonomousNode(Node):
         self.execute_next_action()
 
     def execute_next_action(self):
+        def remove_top(array):
+            flat = array.flatten()
+            threshold = np.percentile(flat, 95)
+            mask = flat >= threshold
+            flat[mask] = 0
+            flat[mask] = np.max(flat)
+            return flat.reshape(array.shape)
+        
         obs_space = self.model.obs_space
 
         # Collect rgb observations
@@ -94,17 +102,21 @@ class Go2AutonomousNode(Node):
 
         # Collect depth observations
         depth_data = self.bridge.imgmsg_to_cv2(self.last_depth, desired_encoding="passthrough")
-        depth_img = cv2.normalize(depth_data, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
+        self.get_logger().info(str(np.max(depth_data)))
+        depth_data = remove_top(depth_data)
+        depth_data = depth_data.astype('float32')
+        depth_data = depth_data / 1000 / 10
+
+        depth_img = (depth_data * 255).astype('uint8')
         cv2.imwrite(f'last_high_depth_{self.action_count}.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
 
         depth_resize_shape = obs_space['depth'].shape[:2][::-1]
         depth_obs = cv2.resize(depth_data, depth_resize_shape)
-        depth_img = cv2.normalize(depth_obs, None, 0, 255, cv2.NORM_MINMAX).astype('uint8')
+
+        depth_img = (depth_obs * 255).astype('uint8')
         cv2.imwrite(f'last_low_depth_{self.action_count}.jpg', cv2.cvtColor(depth_img, cv2.COLOR_RGB2BGR))
         self.get_logger().info('Saved last frame depth')
 
-        depth_obs = depth_obs.astype('float32')
-        depth_obs = cv2.normalize(depth_obs, None, 0, 1, cv2.NORM_MINMAX)
         depth_obs = depth_obs[:, :, np.newaxis]
 
         observations = {
