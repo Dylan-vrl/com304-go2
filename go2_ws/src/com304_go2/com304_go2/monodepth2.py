@@ -3,6 +3,7 @@ from . import networks
 import torch
 import PIL.Image as pil
 from torchvision import transforms
+import cv2
 
 # choices, for reference
 # choices = [
@@ -51,19 +52,18 @@ class RGBtoDepthModel():
     def convert(self, rgb):
         with torch.no_grad():
             # load image, preprocess
-            image = pil.fromarray(rgb).convert("RGB")
-            original_width, original_height = image.size
-            image = image.resize((self.feed_width, self.feed_height), pil.LANCZOS)
-            image = transforms.ToTensor()(image).unsqueeze(0)
+            original_res = rgb.shape[:2]
+            rgb = cv2.resize(rgb, (self.feed_width, self.feed_height))
+            rgb = transforms.ToTensor()(rgb).unsqueeze(0)
 
             # prediction
-            image = image.to(self.device)
-            features = self.encoder(image)
+            rgb = rgb.to(self.device)
+            features = self.encoder(rgb)
             outputs = self.depth_decoder(features)
 
             disp = outputs[("disp", 0)]
             disp_resized = torch.nn.functional.interpolate(
-                disp, (original_height, original_width), mode="bilinear", align_corners=False)
+                disp, original_res, mode="bilinear", align_corners=False)
 
             # Saving colormapped depth image
             disp_resized_np = disp_resized.squeeze().cpu().numpy()

@@ -8,11 +8,13 @@ from geometry_msgs.msg import Twist
 from com304_interfaces.msg import Move, Rotate
 import numpy as np
 from PIL import Image as PILImage
-import cv2 as cv
+import cv2
+from cv_bridge import CvBridge
 
 from pathlib import Path
-from .custom_agent import CustomAgent
+from .habitat_nn import HabitatController
 from .habitat_utils.ppo_agents import PPOAgentConfig
+from .monodepth2 import RGBtoDepthModel
 
 from math import cos, sin
 
@@ -28,19 +30,18 @@ class Go2AutonomousNode(Node):
         self.goal_subscriber = self.create_subscription(Empty, '/goal_reached', self.goal_reached_callback, 10)
         self.start_subscriber = self.create_subscription(Empty, '/start', self.start_callback, 10)
 
-        self.last_image = None
+        self.last_rgb = None
+        self.bridge = CvBridge()
 
-        model_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'model_only.pth'
-        agent_config = PPOAgentConfig()
-        agent_config.INPUT_TYPE = "rgbd"
-        agent_config.MODEL_PATH = model_path
-        agent_config.GOAL_SENSOR_UUID = "pointgoal"
-        agent_config.RESOLUTION = (256, 144)
+        cfg_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'config' / 'config_empty.yaml'
+        ckpt_path = Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'model_empty.pth'
 
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
-        self.model = CustomAgent(agent_config, Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'mono+stereo_640x192')
-        self.model.reset()        
+        self.action_count = 0
+
+        self.model = HabitatController(cfg_path, ckpt_path)
+        self.rgb2depth = RGBtoDepthModel(Path(__file__).parent.parent.parent.parent.parent / 'share' / __package__ / 'models' / 'mono+stereo_640x192')
 
     def stop(self):
         msg = Empty()
@@ -49,25 +50,25 @@ class Go2AutonomousNode(Node):
 
     def move_forward(self):
         msg = Move()
-        msg.x = 0.3
+        msg.x = 0.5
         msg.y = 0.0
         self.move_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Move forward")
 
     def turn_left(self):
         msg = Rotate()
-        msg.yaw = math.pi/6
+        msg.yaw = math.pi/4
         self.rotate_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Turn left")
 
     def turn_right(self):
         msg = Rotate()
-        msg.yaw = -math.pi/6
+        msg.yaw = -math.pi/4
         self.rotate_publisher.publish(msg)
         self.get_logger().info(f"Action taken: Turn right")
 
     def cam_callback(self, msg: Image):
-        self.last_image = msg
+        self.last_rgb = msg
 
     def goal_reached_callback(self, msg: Empty):
         self.get_logger().info("Goal reached callback")
@@ -78,21 +79,35 @@ class Go2AutonomousNode(Node):
         self.execute_next_action()
 
     def execute_next_action(self):
-        self.get_logger().info(str(len(self.last_image.data)))
-        data = np.frombuffer(self.last_image.data, dtype='uint8')
-        data_2d = np.reshape(data, (self.last_image.height, self.last_image.step))
-        image_array = data_2d.reshape((self.last_image.height, self.last_image.width, 3))
+        obs_space = self.model.obs_space
 
-        # image = PILImage.fromarray(image_array).convert('RGB')
-        # image.save('test.png')
-        # im_np = cv.resize(image_array, (64, 36))
-        # image = PILImage.fromarray(im_np)
-        # image.save('test2.png')
+        # Collect rgb observations
+        rgb_data = self.bridge.imgmsg_to_cv2(self.last_rgb, desired_encoding="rgb8")
+        cv2.imwrite(f'last_high_rgb_{self.action_count}.jpg', cv2.cvtColor(rgb_data, cv2.COLOR_RGB2BGR))
+        self.get_logger().info(str(rgb_data.shape))
+
+        rgb_resize_shape = obs_space['rgb'].shape[:2][::-1]
+        rgb_obs = cv2.resize(rgb_data, rgb_resize_shape)
+        self.get_logger().info(str(rgb_obs.shape))
+        cv2.imwrite(f'last_low_rgb_{self.action_count}.jpg', cv2.cvtColor(rgb_obs, cv2.COLOR_RGB2BGR))
+        self.get_logger().info('Saved last frame rgb')
+
+        # Collect depth observations
+        depth_obs = self.rgb2depth.convert(rgb_obs)
+        cv2.imwrite(f'last_low_depth_{self.action_count}.jpg', cv2.cvtColor(depth_obs * 255, cv2.COLOR_RGB2BGR))
+        self.get_logger().info(str(np.max(depth_obs)))
+        depth_obs = cv2.normalize(depth_obs, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+        self.get_logger().info(str(np.max(depth_obs)))
+        self.get_logger().info('Saved last frame depth')
+
+        depth_obs = depth_obs[:, :, np.newaxis]
 
         observations = {
-            "rgb": np.array(image_array, dtype='uint8'),
+            "rgb": rgb_obs,
+            "depth": depth_obs
         }
-        next_action = self.model.act(observations)['action']
+        self.action_count += 1
+        next_action = self.model.act(observations)
         self.get_logger().info(f'Next action {next_action}')
         self.actions[next_action]()
 
