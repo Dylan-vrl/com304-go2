@@ -2,7 +2,7 @@ For more details about the installation process, take a look at the [`go2_ros2_s
 
 It is assumed you have both [`rust`](https://www.rust-lang.org/tools/install) and [`ros2`](https://docs.ros.org/en/humble/Installation.html) installed. 
 
-Our code may become invalid due to changes in the SDK we use. For example, if they change some topics name, you will have to adapt the code accordingly.
+**Warning:** Our code may become invalid due to changes in the SDK we use. For example, if they change some topics name, you will have to adapt the code accordingly.
 
 ## Quick start
 
@@ -81,7 +81,7 @@ ros2 launch com304_go2 autonomous.launch.py
 ```bash
 source install/setup.bash
 ros2 topic pub --once /stop std_msgs/msg/Empty # Put the robot in valid state
-ros2 topic pub --once /start std_msgs/msg/Empty # Start navigations
+ros2 topic pub --once /start std_msgs/msg/Empty # Start navigation
 ```
 
 
@@ -95,7 +95,7 @@ There's multiple points to consider regarding autonomous navigation using a trai
 
 Its observation space should expect RGB and depth data. Note however that the depth data is estimated from RGB using [`monodepth2`](https://github.com/nianticlabs/monodepth2). This method has limitations, in particular in empty rooms or if the robot is facing a wall: without enough information the depth estimate will be bad. If you need higher precision depth information, consider using [go2_local_ws](../go2_local_ws/) instead.
 
-The checkpoint (`.pth`) files you provide in the `models` folder should only contain the content of the `state_dict` key of your model. To convert your model to the correct format you can use the dedicated [`ckpt_to_model_only.py`](../../ckpt_to_model_only.py) script.
+The checkpoint (`.pth`) files you provide in the `models` folder should only contain the content of the `state_dict` key of your model. By default `state_dict`, `extra_state` and `config` keys are saved in the checkpoint.
 
 
 ## Troubleshooting

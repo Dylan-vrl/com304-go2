@@ -42,7 +42,7 @@ class Go2ControlNode(Node):
             self.get_logger().info('/go2/modes service not available, waiting again...')
         self.mode_req = Go2Modes.Request()
 
-        self.cmd_vel_publisher = self.create_publisher(Twist, '/go2/cmd_vel', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.goal_reached_publisher = self.create_publisher(Empty, '/goal_reached', 10)
 
         self.move_msg_timer = self.create_timer(0.05, self.move_msg_callback)

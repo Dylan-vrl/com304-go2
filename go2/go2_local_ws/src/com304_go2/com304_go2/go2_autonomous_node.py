@@ -4,15 +4,11 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Empty
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Twist
 from com304_interfaces.msg import Move, Rotate
 
 from pathlib import Path
-from .habitat_nn import HabitatController
-from .habitat_utils.ppo_agents import PPOAgentConfig
+from .autonomous_agent.controller import Controller
 
-from PIL import Image as PILImage
-import os
 import numpy as np
 import cv2
 from cv_bridge import CvBridge
@@ -39,7 +35,7 @@ class Go2AutonomousNode(Node):
 
         # copied from config, ORDER MATTERS DO NOT EDIT
         self.actions = [self.stop, self.move_forward, self.turn_left, self.turn_right]
-        self.model = HabitatController(cfg_path, ckpt_path)
+        self.model = Controller(cfg_path, ckpt_path)
         self.action_count = 0
 
     def stop(self):
