@@ -1,0 +1,23 @@
+# Reference: https://github.com/DLR-RM/rl-baselines3-zoo/blob/master/hyperparams/ppo.yml#L245
+seed: 42
+
+policy: 'CnnPolicy'
+batch_size: 512
+n_timesteps: !!float 5e7
+n_steps: 512
+gamma: 0.99
+gae_lambda: 0.95
+n_epochs: 10
+ent_coef: 0.0
+sde_sample_freq: 4
+max_grad_norm: 0.5
+vf_coef: 0.5
+learning_rate: lin_1e-4
+use_sde: True
+clip_range: 0.2
+device: "cuda:0"
+policy_kwargs: "dict(log_std_init=-2,
+                     ortho_init=False,
+                     activation_fn=nn.GELU,
+                     net_arch=dict(pi=[256], vf=[256]),
+                     )"
