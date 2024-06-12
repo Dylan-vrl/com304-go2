@@ -1,4 +1,4 @@
-**Warning:** Our code may become invalid or be put in an unusable state due to changes required to support the QRE DSK. For example, if the SDK changes the names of certain ROS topics, you will have to adapt the code accordingly.
+**Warning:** Our code may become invalid or be put in an unusable state due to changes required to support the QRE SDK. For example, if the SDK changes the names of certain ROS topics, you will have to adapt the code accordingly.
 
 **Warning:** The QRE SDK is a private repository available only for clients of [MYBOTSHOP.de](https://www.mybotshop.de/), to get access to the repository you must get in contact with them.
 
