@@ -6,8 +6,8 @@ needs some tweaks.
 ## Simulator
 We are using [Isaac Lab](https://isaac-sim.github.io/IsaacLab/) (previously known as [Isaac Orbit](https://isaac-orbit.github.io/)) 
 which is a wrapper for [Isaac sim](https://docs.omniverse.nvidia.com/isaacsim/latest/index.html) with RL oriented features.
-The simulator was developed by NVIDIA and provides high scalability, performance and fidelity simulation, allowing us to run 
-parallelized environments exclusively on GPU.
+The simulator was developed by NVIDIA and provides high performance and fidelity simulation with real time ray tracing,
+allowing us to run parallelized environments exclusively on GPU.
 
 ### Requirements 
 - NVIDIA RTX GPU with CUDA 11.0 or higher and at least 12GB of VRAM
@@ -26,6 +26,8 @@ through rough randomized terrain using force and lazer sensors. <br/>
 
 ## Our task
 ### Simulation environment
-
+We started by creating a simple room that will be used as the environment for the task. It has has multiple groups of meshes 
+for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent randomization when we want to train (for example materials and textures).
+![basic_room](media/basic_room.png)
 ### Reinforcement learning implementation
 
