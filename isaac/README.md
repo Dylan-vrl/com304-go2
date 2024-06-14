@@ -17,11 +17,13 @@ allowing us to run parallelized environments exclusively on GPU.
 ### Examples of possible tasks
 The simulator allows for native ROS2 support and provides a set of sensors, including RGBD cameras, IMU, and LIDAR to mention a few.
 While learning how to use the simulator, we have been able to create a simple environment with a GO2 robot controlled using 
-a trained low level policy and ROS2 teleop, we were also able to get sensor data such as Lidar (note: these visible points are for debugging). <br/>
+a trained low level policy and ROS2 teleop, we were also able to get sensor data such as Lidar (note: these visible points are for debugging).
+
+This is shown in the video below (click).<br/>
 [![lidar_go2](https://img.youtube.com/vi/Dx7pLRo_t60/0.jpg)](https://www.youtube.com/watch?v=Dx7pLRo_t60)
 
 It is also possible to create more complex tasks such as the one shown in the video below where an agent has to navigate 
-through rough randomized terrain using force and lazer sensors. <br/>
+through rough randomized terrain using force and lazer sensors as shown in the video below (click). <br/>
 [![rough_terrain](https://img.youtube.com/vi/uhK3vNfGLug/0.jpg)](https://www.youtube.com/watch?v=uhK3vNfGLug) 
 
 ## Our task
@@ -40,7 +42,7 @@ attached to it and a red ball.
 ### Control
 We were able to control out robot using both distance based and velocity based commands, the below shows the robot moving
 using distance commands, however we opted for velocity commands in the end as they are closer to the actual robot's API. 
-[(actions config)](targetnav/configs/action.py)<br/>
+[(actions config)](targetnav/configs/action.py) (video) <br/>
 [![distance_control](https://img.youtube.com/vi/K6_RPhuBeDU/0.jpg)](https://www.youtube.com/watch?v=K6_RPhuBeDU)
 
 ### Reinforcement learning environment
