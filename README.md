@@ -7,4 +7,4 @@ The model has been trained using reinforcement learning in Habitat in indoor env
 We also explored training our modle on the Isaac simulator. By lack of time, we couldn't produce a final model. You can still find all the related code in the [isaac folder](isaac).
 
 - [go2](go2) folder contains the source code to control the robot manually and autonomously through ethernet, WiFi or locally on the robot computer
-- [isaac](isaac) folder contains the source code for the Isaac training pipeline
+- [isaac](isaac) folder contains the source code for the Isaac Lab task definition
