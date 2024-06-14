@@ -71,7 +71,7 @@ We can train a lot of instances in parallel (order of 1000s depending on amount 
 using headless mode which disables full visual rendering and only keeps the required buffers in VRAM and the training 
 happens on the order of 10s of thousands of FPS. <br/>
 
-Below is a video example with 8 environment with rendering on. <br/>
+Below is a video example with 8 environments with rendering on. <br/>
 [![envs](https://img.youtube.com/vi/4SBhNwrkMtw/0.jpg)](https://www.youtube.com/watch?v=4SBhNwrkMtw) <br/>
 
 ### Results
