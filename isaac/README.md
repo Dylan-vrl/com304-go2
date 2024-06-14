@@ -42,7 +42,7 @@ using distance commands, however we opted for velocity commands in the end as th
 [(actions config)](targetnav/configs/action.py)<br/>
 [![distance_control](https://img.youtube.com/vi/K6_RPhuBeDU/0.jpg)](https://www.youtube.com/watch?v=K6_RPhuBeDU)
 
-### Reinforcement learning implementation
+### Reinforcement learning environment
 The observations, rewards and terminations of the environment can be found in the [base_env_setup](targetnav/base_env_setup.py) file. <br/><br/>
 The input to the agent is a 4D tensor of shape (128, 128, 4) (rgbd), which is perfect for a CNN based policy. The group 'sim' is used internally for 
 example for reward generation and terminations. [observations mdp](targetnav/mdp/observations.py) <br/>
@@ -53,4 +53,12 @@ Negative rewards are also used to avoid certain situations like long runs and wa
 has not yet been taken into consideration in the rewards design but is a good idea for real robots. [rewards mdp](targetnav/mdp/rewards.py)<br/>
 ![rewards](media/rewards.png) <br/><br/>
 The rest of the Managers look like the following: <br/> 
-<img src="media/event_term.png" width="40%"/> <img src="media/comm_actions.png" width="40%"/>  <br/><br/>
+<img src="media/event_term.png" width="49%"/> <img src="media/comm_actions.png" width="49%"/>  <br/><br/>
+
+### Training pipeline
+Training in isaac lab is done through wrapping the environment in multiple wrappers. starting with registering it as a 
+[gymnasium](https://gymnasium.farama.org/index.html) task (previously known as OpenAI gym). This is done in the 
+[__init__.py](targetnav/__init__.py) file. Afterwards, the environment can be wrapped for video recording, logging, etc...
+And finally the environment is wrapped in a training framework such as [Stable Baselines3](https://stable-baselines3.readthedocs.io/en/master/index.html)
+or [rl_games](https://github.com/Denys88/rl_games). The configurations can be found in the [agents](targetnav/agents) folder and 
+an example pipeline in the [train.py]() file<br/>
