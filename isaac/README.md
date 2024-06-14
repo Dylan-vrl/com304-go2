@@ -45,9 +45,12 @@ using distance commands, however we opted for velocity commands in the end as th
 ### Reinforcement learning implementation
 The observations, rewards and terminations of the environment can be found in the [base_env_setup](targetnav/base_env_setup.py) file. <br/><br/>
 The input to the agent is a 4D tensor of shape (128, 128, 4) (rgbd), which is perfect for a CNN based policy. The group 'sim' is used internally for 
-example for reward generation and terminations <br/>
+example for reward generation and terminations. [observations mdp](targetnav/mdp/observations.py) <br/>
 ![observations](media/observations.png) <br/><br/>
 The rewards are an intermediary reward for being close to the ball (l2 distance smaller than a threshold) and a final 
 reward for being oriented correctly.
 Negative rewards are also used to avoid certain situations like long runs and wall slides etc... A termination command 
-has not yet been taken into consideration in the rewards design but is a good idea for real robots<br/>
+has not yet been taken into consideration in the rewards design but is a good idea for real robots. [rewards mdp](targetnav/mdp/rewards.py)<br/>
+![rewards](media/rewards.png) <br/><br/>
+The rest of the Managers look like the following: <br/> 
+<img src="media/event_term.png" width="40%"/> <img src="media/comm_actions.png" width="40%"/>  <br/><br/>
