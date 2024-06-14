@@ -29,6 +29,7 @@ through rough randomized terrain using force and lazer sensors. <br/>
 We started by creating a simple room that will be used as the environment for the task. It has lighting and multiple groups of meshes 
 for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent randomization when we want to train (for example materials and textures). <br/>
 ![basic_room](media/basic_room.png)
+
 We also created a model for the lab room. <br/>
 <img src="media/lab_top.png" width="49%"/> <img src="media/lab_inside.png" width="49%"/> <br/><br/>
 We can then spawn a model for the robot that is modeled by a cuboid of same dimensions as the Go2 with an RGBD camera 
@@ -57,7 +58,7 @@ The rest of the Managers look like the following: <br/>
 
 ### Training pipeline
 Training in isaac lab is done through wrapping the environment in multiple wrappers. Starting with registering it as a 
-[gymnasium](https://gymnasium.farama.org/index.html) task (previously known as OpenAI gym). This is done in the 
+[gymnasium](https://gymnasium.farama.org/index.html) environment (previously known as OpenAI gym). This is done in the 
 [__init__.py](targetnav/__init__.py) file. <br/>
 Afterward, the environment can be wrapped for video recording, logging, etc... <br/>
 And finally the environment is wrapped in a training framework such as [Stable Baselines3](https://stable-baselines3.readthedocs.io/en/master/index.html)
@@ -67,6 +68,7 @@ an example pipeline for sb3 in the [train.py]() file.<br/>
 We can train a lot of instances in parallel (order of 1000s depending on amount of graphics memory and environment) while 
 using headless mode which disables full visual rendering and only keeps the required buffers in VRAM and the training 
 happens on the order of 10s of thousands of FPS. <br/>
+
 Below is a video example with 8 environment with rendering on. <br/>
 [![envs](https://img.youtube.com/vi/4SBhNwrkMtw/0.jpg)](https://www.youtube.com/watch?v=4SBhNwrkMtw) <br/>
 
@@ -78,6 +80,6 @@ Using tensorboard to visualize the training, we can see that the model is minimi
 increasing as expected, instead they were decreasing with time which needs further investigation. <br/>
 <img src="media/graphs.jpg" width="49%"/> <img src="media/graphs_rollout.jpg" width="49%"/>  <br/>
 
-We also faced last minute problems with mesh collisions which were not working properly which led to poor performance while
-training and did not allow us to scale. <br/>
+We also faced last minute problems with mesh collisions which were not working properly which led to performance and 
+scaling problems while training. <br/>
 ![incompatible mesh](media/incompatible_mesh.png) <br/>
