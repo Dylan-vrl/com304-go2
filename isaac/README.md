@@ -41,7 +41,7 @@ attached to it and a red ball. We made it so that they spawn in random locations
 
 ### Control
 We were able to control out robot using both distance based and velocity based commands, the below shows the robot moving
-using distance commands, however we opted for velocity commands in the end as they are closer to the actual robot's API. 
+using distance commands (KI controller), however we opted for velocity commands in the end as they are closer to the actual robot's API. 
 [(actions config)](targetnav/configs/action.py) (video) <br/>
 [![distance_control](https://img.youtube.com/vi/K6_RPhuBeDU/0.jpg)](https://www.youtube.com/watch?v=K6_RPhuBeDU)
 
