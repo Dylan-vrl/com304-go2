@@ -26,8 +26,13 @@ through rough randomized terrain using force and lazer sensors. <br/>
 
 ## Our task
 ### Simulation environment
-We started by creating a simple room that will be used as the environment for the task. It has has multiple groups of meshes 
-for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent randomization when we want to train (for example materials and textures).
+We started by creating a simple room that will be used as the environment for the task. It has lighting and multiple groups of meshes 
+for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent randomization when we want to train (for example materials and textures). <br/>
 ![basic_room](media/basic_room.png)
-### Reinforcement learning implementation
+We also created a model for the lab room. <br/>
+<img src="media/lab_top.png" width="49%"/> <img src="media/lab_inside.png" width="49%"/> <br/><br/>
+We can then spawn a model for the robot that is modeled by a cuboid of same dimensions as the Go2 with an RGBD camera 
+attached to it and a red ball. <br/>
+<img src="media/basic_setup.png" width="49%"/> <img src="media/robot_pov.png" width="49%"/> <br/><br/>
 
+### Reinforcement learning implementation
