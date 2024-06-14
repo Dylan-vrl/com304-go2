@@ -25,14 +25,29 @@ through rough randomized terrain using force and lazer sensors. <br/>
 [![rough_terrain](https://img.youtube.com/vi/uhK3vNfGLug/0.jpg)](https://www.youtube.com/watch?v=uhK3vNfGLug) 
 
 ## Our task
-### Simulation environment
+### Scene
 We started by creating a simple room that will be used as the environment for the task. It has lighting and multiple groups of meshes 
 for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent randomization when we want to train (for example materials and textures). <br/>
 ![basic_room](media/basic_room.png)
 We also created a model for the lab room. <br/>
 <img src="media/lab_top.png" width="49%"/> <img src="media/lab_inside.png" width="49%"/> <br/><br/>
 We can then spawn a model for the robot that is modeled by a cuboid of same dimensions as the Go2 with an RGBD camera 
-attached to it and a red ball. <br/>
+attached to it and a red ball. 
+[(scene config)](targetnav/configs/scene.py)<br/>
 <img src="media/basic_setup.png" width="49%"/> <img src="media/robot_pov.png" width="49%"/> <br/><br/>
 
+### Control
+We were able to control out robot using both distance based and velocity based commands, the below shows the robot moving
+using distance commands, however we opted for velocity commands in the end as they are closer to the actual robot's API. 
+[(actions config)](targetnav/configs/action.py)<br/>
+[![distance_control](https://img.youtube.com/vi/K6_RPhuBeDU/0.jpg)](https://www.youtube.com/watch?v=K6_RPhuBeDU)
+
 ### Reinforcement learning implementation
+The observations, rewards and terminations of the environment can be found in the [base_env_setup](targetnav/base_env_setup.py) file. <br/><br/>
+The input to the agent is a 4D tensor of shape (128, 128, 4) (rgbd), which is perfect for a CNN based policy. The group 'sim' is used internally for 
+example for reward generation and terminations <br/>
+![observations](media/observations.png) <br/><br/>
+The rewards are an intermediary reward for being close to the ball (l2 distance smaller than a threshold) and a final 
+reward for being oriented correctly.
+Negative rewards are also used to avoid certain situations like long runs and wall slides etc... A termination command 
+has not yet been taken into consideration in the rewards design but is a good idea for real robots<br/>
