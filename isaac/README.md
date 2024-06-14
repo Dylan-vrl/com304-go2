@@ -35,7 +35,7 @@ for example ceiling, floor, wall_wood, wall_reg... which will allow for coherent
 We also created a model for the lab room. <br/>
 <img src="media/lab_top.png" width="49%"/> <img src="media/lab_inside.png" width="49%"/> <br/><br/>
 We can then spawn a model for the robot that is modeled by a cuboid of same dimensions as the Go2 with an RGBD camera 
-attached to it and a red ball. 
+attached to it and a red ball. We made it so that they spawn in random locations in the room each time the environment is reset.
 [(scene config)](targetnav/configs/scene.py)<br/>
 <img src="media/basic_setup.png" width="49%"/> <img src="media/robot_pov.png" width="49%"/> <br/><br/>
 
